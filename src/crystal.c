@@ -42,6 +42,7 @@
 #include "types.h"
 #include "comm.h"
 #include "mem.h"
+#include <stdio.h>
 
 #define crystal_init   PREFIXED_NAME(crystal_init  )
 #define crystal_free   PREFIXED_NAME(crystal_free  )
@@ -78,6 +79,7 @@ static uint crystal_move(struct crystal *p, uint cutoff, int send_hi)
   uint *keep = p->data.ptr, *send;
   uint n = p->data.n;
   send = buffer_reserve(&p->work,n*sizeof(uint));
+  assert(send != NULL);
   if(send_hi) { /* send hi, keep lo */
     for(src=keep,end=keep+n; src<end; src+=len) {
       len = 3 + src[2];
@@ -113,6 +115,22 @@ static void crystal_exchange(struct crystal *p, uint send_n, uint targ,
   recv[0] = (uint*)p->data.ptr + p->data.n, recv[1] = recv[0] + count[0];
   p->data.n = sum;
   
+  for (uint d = 0; d < 2; d++) {
+    size_t t = count[d];
+    t *= sizeof(uint);
+    if (t >= INT_MAX) {
+      printf("count[%d] = %u t = %zu\n", d, count[d], t);
+      fflush(stdout);
+    }
+  }
+
+  size_t t = send_n;
+  t *= sizeof(uint);
+  if (t >= INT_MAX) {
+    printf("send_n = %u t = %zu\n", send_n, t);
+    fflush(stdout);
+  }
+
   if(recvn)    comm_irecv(&req[1],&p->comm,
                           recv[0],count[0]*sizeof(uint), targ        ,tag+1);
   if(recvn==2) comm_irecv(&req[2],&p->comm,
@@ -131,6 +149,7 @@ void crystal_router(struct crystal *p)
     nl = (n+1)/2, bh = bl+nl;
     send_hi = id<bh;
     send_n = crystal_move(p,bh,send_hi);
+    assert(send_n >= 0);
     recvn = 1, targ = n-1-(id-bl)+bl;
     if(id==targ) targ=bh, recvn=0;
     if(n&1 && id==bh) recvn=2;
