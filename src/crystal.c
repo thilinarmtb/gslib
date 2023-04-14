@@ -40,6 +40,7 @@
 #include "name.h"
 #include "fail.h"
 #include "types.h"
+#include "gs_defs.h"
 #include "comm.h"
 #include "mem.h"
 #include <stdio.h>
@@ -124,13 +125,6 @@ static void crystal_exchange(struct crystal *p, uint send_n, uint targ,
     }
   }
 
-  size_t t = send_n;
-  t *= sizeof(uint);
-  if (t >= INT_MAX) {
-    printf("send_n = %u t = %zu\n", send_n, t);
-    fflush(stdout);
-  }
-
   if(recvn)    comm_irecv(&req[1],&p->comm,
                           recv[0],count[0]*sizeof(uint), targ        ,tag+1);
   if(recvn==2) comm_irecv(&req[2],&p->comm,
@@ -148,8 +142,35 @@ void crystal_router(struct crystal *p)
   while(n>1) {
     nl = (n+1)/2, bh = bl+nl;
     send_hi = id<bh;
+
+    uint input_n = p->data.n;
     send_n = crystal_move(p,bh,send_hi);
-    assert(send_n >= 0);
+
+    size_t t = send_n;
+    t *= sizeof(uint);
+    sint overflow = 0;
+    if (t >= INT_MAX)
+      overflow = 1;
+
+    slong wrk[2];
+    comm_allreduce(&p->comm, gs_int, gs_max, &overflow, 1, wrk);
+    if (overflow) {
+      slong ss = send_n;
+      comm_allreduce(&p->comm, gs_long, gs_max, &ss, 1, wrk);
+      if (p->comm.id ==0) {
+        printf("send_n = %u n = %u np = %u id = %u\n", send_n, n, p->comm.np,
+          p->comm.id);
+        fflush(stdout);
+      }
+
+      ss = input_n;
+      comm_allreduce(&p->comm, gs_long, gs_max, &ss, 1, wrk);
+      if (p->comm.id == 0) {
+        printf("\tmax input_n = %lld\n", ss);
+        fflush(stdout);
+      }
+    }
+
     recvn = 1, targ = n-1-(id-bl)+bl;
     if(id==targ) targ=bh, recvn=0;
     if(n&1 && id==bh) recvn=2;
