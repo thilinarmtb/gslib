@@ -1,0 +1,11 @@
+#cmakedefine GSLIB_USE_MPI
+#cmakedefine GSLIB_UNDERSCORE
+#cmakedefine GSLIB_USE_GLOBAL_LONG_LONG
+#cmakedefine GSLIB_USE_USR_EXIT
+#cmakedefine GSLIB_USE_NBC
+#cmakedefine GSLIB_USE_NAIVE_BLAS
+#cmakedefine GSLIB_USE_CBLAS
+#cmakedefine GSLIB_USE_MKL
+
+#define GSLIB_PREFIX @GSLIB_PREFIX@
+#define GSLIB_FPREFIX @GSLIB_FPREFIX@

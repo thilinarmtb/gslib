@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+set(gs_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include")
+set(gs_LIBRARY_DIR "@CMAKE_INSTALL_PREFIX@/lib")
+set(gs_LIBRARIES gs)
+
+# Import targets
+include("${CMAKE_CURRENT_LIST_DIR}/gsTargets.cmake")
