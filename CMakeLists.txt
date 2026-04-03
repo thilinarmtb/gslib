@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project name
-project(gslib LANGUAGES C Fortran)
+project(gslib LANGUAGES C Fortran VERSION 1.0.9)
 
 # Options similar to Makefile variables
 option(GSLIB_USE_MPI "Enable MPI" ON)
@@ -109,20 +109,30 @@ target_include_directories(gs
     $<BUILD_INTERFACE:${SRCDIR}>
 )
 
-# Configure library export options
-set(EXPORT_TARGETS_FILE "gsTargets.cmake") # Exported targets filename
-
-# Make it exportable by creating an export name
+# Install gslib
 install(TARGETS gs
   EXPORT gsTargets
   ARCHIVE DESTINATION lib
 )
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/config.h"
+  @ONLY
+)
+file(GLOB HEADER_FILES "${SRCDIR}/*.h")
+install(FILES ${HEADER_FILES} DESTINATION include)
 
-# Install headers and CMake configuration
+# Export gs targets.
+set(EXPORT_TARGETS_FILE "gsTargets.cmake")
+install(EXPORT gsTargets
+  FILE gsTargets.cmake
+  NAMESPACE gs::
+  DESTINATION lib/cmake/gs
+)
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/gsConfigVersion.cmake"
-  VERSION 1.0.9
+  VERSION ${PROJECT_VERSION}
   COMPATIBILITY AnyNewerVersion
 )
 configure_file(
@@ -133,19 +143,5 @@ configure_file(
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/gsConfig.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/gsConfigVersion.cmake"
-  DESTINATION lib/cmake/gs
-)
-
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/config.h"
-  @ONLY
-)
-
-file(GLOB HEADER_FILES "${SRCDIR}/*.h")
-install(FILES ${HEADER_FILES} DESTINATION include)
-install(EXPORT gsTargets
-  FILE gsTargets.cmake
-  NAMESPACE gs::
   DESTINATION lib/cmake/gs
 )
