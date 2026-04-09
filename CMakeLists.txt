@@ -69,6 +69,7 @@ endif()
 
 # Source directories
 set(SRCROOT ${CMAKE_CURRENT_SOURCE_DIR})
+set(BLDROOT ${CMAKE_CURRENT_BINARY_DIR})
 set(TESTDIR ${SRCROOT}/tests)
 set(FTESTDIR ${TESTDIR}/fortran)
 set(SRCDIR ${SRCROOT}/src)
@@ -115,8 +116,8 @@ install(TARGETS gs
   ARCHIVE DESTINATION lib
 )
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/config.h"
+  "${SRCROOT}/config.h.in"
+  "${SRCROOT}/src/config.h"
   @ONLY
 )
 file(GLOB HEADER_FILES "${SRCDIR}/*.h")
@@ -131,17 +132,17 @@ install(EXPORT gsTargets
 )
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/gsConfigVersion.cmake"
+  "${BLDROOT}/gsConfigVersion.cmake"
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY AnyNewerVersion
 )
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/gsConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/gsConfig.cmake"
+  "${SRCROOT}/gsConfig.cmake.in"
+  "${BLDROOT}/gsConfig.cmake"
   @ONLY
 )
 install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/gsConfig.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/gsConfigVersion.cmake"
+  "${BLDROOT}/gsConfig.cmake"
+  "${BLDROOT}/gsConfigVersion.cmake"
   DESTINATION lib/cmake/gs
 )
