@@ -109,6 +109,7 @@ target_include_directories(gs
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${SRCDIR}>
 )
+add_library(gs::gs ALIAS gs)
 
 # Install gslib
 install(TARGETS gs
